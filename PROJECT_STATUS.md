@@ -46,34 +46,29 @@
 
 ## 🔄 IN PROGRESS
 
-### Backend (NestJS) - 20% DONE 🔄
+### Backend & Database (Express.js + PostgreSQL) - 40% DONE 🔄
 | Component | Status | Notes |
 |-----------|--------|-------|
-| **Project Structure** | ✅ Ready | NestJS with modules |
-| **Auth Controller** | ✅ Template | Needs implementation |
-| **Auth Service** | ✅ Template | JWT logic ready, needs DB integration |
-| **Database Schema** | ✅ Template | Drizzle ORM setup, needs migration |
-| **Routes** | ⏳ TODO | Need full CRUD endpoints |
+| **Server Setup** | ✅ Complete | Express server at `server/index.js` |
+| **Database Connection** | ✅ Complete | Connected to live PostgreSQL |
+| **Authentication** | ✅ Complete | Live Paseto token verification middleware |
+| **Inventory Endpoint (GET)** | ✅ Complete | `/inventory` route fetches all items |
+| **Inventory Endpoints (CUD)** | ⏳ TODO | `POST`, `PUT`, `DELETE` for items |
+| **Movement Endpoints** | ⏳ TODO | `POST` for inbound, outbound, transfer |
+| **User Management** | ⏳ TODO | User creation, roles, etc. |
 
 **Missing:**
-- ❌ Database connection implementation
-- ❌ User creation & seeding
-- ❌ Inventory endpoints
-- ❌ Movement tracking endpoints
-- ❌ Role-based access control
-- ❌ Input validation
-- ❌ Error handling
+- ❌ Endpoints for Create, Update, Delete operations.
+- ❌ Logic for handling stock movements.
+- ❌ Database seeding scripts.
+- ❌ Advanced error handling.
 
 ---
 
-## ⏳ NOT STARTED
+## ⏳ PLANNED / NOT STARTED
 
-### Database - 0% DONE ⏳
-- [ ] PostgreSQL database creation
-- [ ] Drizzle migrations deployment
-- [ ] Initial seed data
-- [ ] User accounts setup
-- [ ] Test data population
+### Future Backend (NestJS) - 0% DONE ⏳
+- The `backend` folder contains a template for a future migration to NestJS. It is not currently active.
 
 ### Testing - 0% DONE ⏳
 - [ ] Unit tests
@@ -94,10 +89,10 @@
 
 ```
 Frontend:  ████████████████████ 100%
-Backend:   ████░░░░░░░░░░░░░░░░  20%
-Database:  ░░░░░░░░░░░░░░░░░░░░   0%
+Backend:   ████████░░░░░░░░░░░░  40%
+Database:  ██████░░░░░░░░░░░░░░  30%
 Testing:   ░░░░░░░░░░░░░░░░░░░░   0%
-Overall:   ████████░░░░░░░░░░░░  40%
+Overall:   ██████████░░░░░░░░░░  50%
 ```
 
 ---
@@ -116,18 +111,18 @@ npm start
 **Features:** 100% functional
 **Time to start:** 2 minutes
 
-### Mode 2: Full Stack (With Backend) ⏳
+### Mode 2: Full Stack (With Backend) ✅ PARTIALLY WORKING
 ```bash
-# Terminal 1
-cd backend
-npm run start:dev
+# Terminal 1 (Backend)
+cd server
+npm start
 
-# Terminal 2
+# Terminal 2 (Frontend)
 cd client
-REACT_APP_USE_REAL_API=true npm start
+npm start
 ```
-**Status:** ⏳ NEEDS backend implementation
-**Features:** Depends on backend completion
+**Status:** ✅ PARTIALLY WORKING (Read-only)
+**Features:** Fetches live data from the database.
 **Time to complete:** 1-2 weeks
 
 ---
@@ -143,12 +138,12 @@ npm start
 # Test login, inventory, modals
 ```
 
-### Priority 2: Backend Implementation (NEXT WEEK) 
-1. [ ] Setup PostgreSQL
-2. [ ] Implement auth endpoints
-3. [ ] Implement inventory endpoints
-4. [ ] Implement movement endpoints
-5. [ ] Seed initial data
+### Priority 2: Expand Backend Functionality (NEXT) 
+1. [ ] Implement `POST /inventory` to add new items.
+2. [ ] Implement `PUT /inventory/:id` to edit items.
+3. [ ] Implement `DELETE /inventory/:id` to delete items.
+4. [ ] Implement movement endpoints (`/movements`).
+5. [ ] Create database seeding scripts.
 
 ### Priority 3: Integration Testing (WEEK AFTER)
 1. [ ] Connect frontend to real API
@@ -191,13 +186,15 @@ npm start
 
 ## 🔐 Authentication System
 
-**Current Mode:** Mock tokens
+**Current Mode:** Live Paseto Tokens
 ```
-Login → Generate mock JWT token → Store in localStorage
+Login → Validate credentials in DB → Generate secure Paseto token → Store
 ↓
-Every API call includes: Authorization: Bearer {token}
+Every API call includes real Paseto token
 ↓
-Mock data responds based on token presence
+Backend verifies token with public key
+↓
+Returns user-specific data (currently read-only)
 ```
 
 **Real Mode (When backend ready):**
@@ -215,11 +212,10 @@ Returns user-specific data
 
 ## 💾 Data Handling
 
-**Mock Mode (Current):**
-- Data stored in memory
-- Resets on page refresh
-- Perfect for UI/UX testing
-- No backend required
+**Live Data Mode (Current):**
+- Data is fetched from PostgreSQL via the Express.js backend.
+- Changes are not yet saved to the DB (currently read-only).
+- The connection between frontend, backend, and database is live.
 
 **Real Mode (Future):**
 - Data persisted in PostgreSQL

@@ -4,8 +4,8 @@
 
 ![Status](https://img.shields.io/badge/Status-Ready%20to%20Demo-brightgreen)
 ![Frontend](https://img.shields.io/badge/Frontend-100%25-brightgreen)
-![Backend](https://img.shields.io/badge/Backend-20%25-yellow)
-![Database](https://img.shields.io/badge/Database-0%25-red)
+![Backend](https://img.shields.io/badge/Backend-40%25-yellow)
+![Database](https://img.shields.io/badge/Database-30%25-orange)
 
 ---
 
@@ -51,12 +51,12 @@ Click "Auto-fill" button for convenience
 
 ### ✅ Currently Working (Mock Data Mode)
 
-- 🔐 User Authentication (JWT tokens)
-- 📦 Inventory Management
+- 🔐 User Authentication (Live Paseto tokens)
+- 📦 Inventory Management (Connected to Live Database)
   - ✅ View all products
-  - ✅ Add new items
-  - ✅ Edit items
-  - ✅ Delete items
+  - ✅ Add new items (UI Only)
+  - ✅ Edit items (UI Only)
+  - ✅ Delete items (UI Only)
   - ✅ Search & filter
   - ✅ Sort by name/stock/price
 
@@ -129,7 +129,10 @@ warehouse-admin/
 │   │   └── index.css
 │   └── package.json
 │
-├── backend/                # NestJS Backend ⏳ IN PROGRESS
+├── server/                 # Active Backend (Express.js) ✅ ACTIVE
+│   └── index.js
+│
+├── backend/                # Planned Backend (NestJS) ⏳ FUTURE
 │   ├── src/
 │   │   ├── modules/
 │   │   │   ├── auth/
@@ -159,10 +162,10 @@ warehouse-admin/
 - **Create React App** - Build tool
 
 ### Backend (Ready to implement)
-- **NestJS** 10.3.0 - Framework
+- **Express.js** - Active Framework
+- **NestJS** 10.3.0 - Planned Framework
 - **PostgreSQL** 14+ - Database
-- **Drizzle ORM** - Database access
-- **JWT** - Authentication
+- **Paseto** - Authentication
 
 ---
 
@@ -203,10 +206,10 @@ Features:
 | Component | Status | Progress |
 |-----------|--------|----------|
 | Frontend | ✅ Ready | 100% |
-| Backend | 🔄 In Progress | 20% |
-| Database | ⏳ Not Started | 0% |
+| Backend | 🔄 In Progress | 40% |
+| Database | 🔄 In Progress | 30% |
 | Testing | ⏳ Not Started | 0% |
-| **Overall** | **40% Complete** | |
+| **Overall** | **50% Complete** | |
 
 ---
 
@@ -230,10 +233,10 @@ npm run build
 
 ## 🔐 Authentication
 
-**Current Mode:** Mock JWT tokens
-- Generates fake tokens instantly
-- Perfect for UI testing
-- No backend needed
+**Current Mode:** Live Paseto Tokens
+- Connects to a real Express.js backend
+- Validates credentials and generates secure tokens
+- Fetches real data from PostgreSQL database
 
 **Future Mode:** Real JWT authentication
 - Validates credentials against database
@@ -244,10 +247,10 @@ npm run build
 
 ## 💡 Key Features Explained
 
-### Mock Data Mode
-- Application works 100% offline
-- Perfect for UI/UX testing
-- No backend server needed
+### **Current State:** Live Data
+- Application connects to a live Express.js backend
+- Data is fetched from and persisted in a PostgreSQL database
+- Ideal for real-world use and further backend development
 - Demo data resets on refresh
 - Ideal for presentations
 
