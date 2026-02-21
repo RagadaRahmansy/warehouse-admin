@@ -69,28 +69,58 @@ app.get('/api/profile', verifyToken, (req, res) => {
 // GET semua item inventaris
 app.get('/api/inventory', verifyToken, async (req, res) => {
   try {
-    const { rows } = await db.query('SELECT * FROM inventory ORDER BY created_at DESC');
+    // Query diubah untuk join dengan tabel warehouses dan mendapatkan nama gudang
+    const { rows } = await db.query(`
+      SELECT 
+        i.id, 
+        i.name, 
+        i.quantity, 
+        i.price, 
+        w.name as warehouse_name 
+      FROM inventory i
+      JOIN warehouses w ON i.warehouse_id = w.id
+      ORDER BY i.name
+    `);
     res.json(rows);
   } catch (err) {
-    console.error(err.message);
+    console.error('[ERROR] GET /api/inventory:', err.message);
     res.status(500).send('Server Error');
   }
 });
 
-// POST item inventaris baru
+// @route   POST api/inventory
+// @desc    Add a new inventory item
+// @access  Private
 app.post('/api/inventory', verifyToken, async (req, res) => {
   try {
-    const { name, category, stock, price } = req.body;
-    if (!name || !category || stock === undefined || price === undefined) {
-        return res.status(400).json({ msg: "Please include all fields" });
+    const { name, quantity, price, warehouse_id } = req.body;
+
+    // Validasi input: name tidak boleh kosong, dan field numerik tidak boleh null
+    if (!name || quantity == null || price == null || warehouse_id == null) {
+      return res.status(400).json({ msg: 'Please enter all fields' });
     }
-    const newItem = await db.query(
-      "INSERT INTO inventory (name, category, stock, price) VALUES ($1, $2, $3, $4) RETURNING *",
-      [name, category, stock, price]
+
+    const newItemQuery = await db.query(
+      'INSERT INTO inventory (name, quantity, price, warehouse_id) VALUES ($1, $2, $3, $4) RETURNING *',
+      [name, quantity, price, warehouse_id]
     );
-    res.status(201).json(newItem.rows[0]);
+
+    res.status(201).json(newItemQuery.rows[0]);
   } catch (err) {
-    console.error(err.message);
+    console.error('[ERROR] POST /api/inventory:', err.message);
+    res.status(500).send('Server Error');
+  }
+});
+
+// === WAREHOUSE API ENDPOINTS ===
+
+// GET semua gudang
+app.get('/api/warehouses', verifyToken, async (req, res) => {
+  try {
+    const { rows } = await db.query('SELECT * FROM warehouses ORDER BY name');
+    res.json(rows);
+  } catch (err) {
+    console.error('[ERROR] GET /api/warehouses:', err.message);
     res.status(500).send('Server Error');
   }
 });
@@ -107,7 +137,7 @@ app.delete('/api/inventory/:id', verifyToken, async (req, res) => {
 
         res.json({ msg: "Item deleted" });
     } catch (err) {
-        console.error(err.message);
+        console.error('[ERROR] DELETE /api/inventory/:id:', err.message);
         res.status(500).send('Server Error');
     }
 });
@@ -116,11 +146,11 @@ app.delete('/api/inventory/:id', verifyToken, async (req, res) => {
 app.put('/api/inventory/:id', verifyToken, async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, category, stock, price } = req.body;
+        const { name, quantity, price, warehouse_id } = req.body;
 
         const updateItem = await db.query(
-            "UPDATE inventory SET name = $1, category = $2, stock = $3, price = $4 WHERE id = $5 RETURNING *",
-            [name, category, stock, price, id]
+            "UPDATE inventory SET name = $1, quantity = $2, price = $3, warehouse_id = $4 WHERE id = $5 RETURNING *",
+            [name, quantity, price, warehouse_id, id]
         );
 
         if (updateItem.rowCount === 0) {
@@ -129,7 +159,7 @@ app.put('/api/inventory/:id', verifyToken, async (req, res) => {
 
         res.json(updateItem.rows[0]);
     } catch (err) {
-        console.error(err.message);
+        console.error('[ERROR] PUT /api/inventory/:id:', err.message);
         res.status(500).send('Server Error');
     }
 });
@@ -147,16 +177,15 @@ app.get('/api/movements', verifyToken, async (req, res) => {
         m.type, 
         m.quantity, 
         m.reference, 
-        m.notes, 
-        m.created_at, 
+        m.notes,
         i.name as product_name 
       FROM movements m
       JOIN inventory i ON m.inventory_id = i.id
-      ORDER BY m.created_at DESC
+      ORDER BY m.id DESC
     `);
     res.json(rows);
   } catch (err) {
-    console.error(err.message);
+    console.error('[ERROR] GET /api/movements:', err.message);
     res.status(500).send('Server Error');
   }
 });
@@ -183,7 +212,7 @@ app.post('/api/movements', verifyToken, async (req, res) => {
     // 2. Update stok di tabel inventory
     const stockChange = type === 'INBOUND' ? quantity : -quantity;
     const updateStock = await client.query(
-      "UPDATE inventory SET stock = stock + $1 WHERE id = $2 RETURNING *",
+      "UPDATE inventory SET quantity = quantity + $1 WHERE id = $2 RETURNING *",
       [stockChange, inventory_id]
     );
     
@@ -203,7 +232,7 @@ app.post('/api/movements', verifyToken, async (req, res) => {
 
   } catch (err) {
     await client.query('ROLLBACK'); // Batalkan transaksi jika ada error
-    console.error('Transaction Error:', err.message);
+    console.error('[ERROR] POST /api/movements:', err.message);
     res.status(500).send('Server Error');
   } finally {
     client.release(); // Kembalikan koneksi ke pool
